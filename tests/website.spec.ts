@@ -1,24 +1,26 @@
 import { expect, test } from '@playwright/test';
 
+// Recommended locator structure
 const locators = {
     url: 'https://the-internet.herokuapp.com/',
-    landingPageHeader: '//h1[text()="Welcome to the-internet"]',
-    abTestingSection: '//a[text()="A/B Testing"]'
-} as const; // make it read only
+    headingRole: { role: 'heading', name: 'Welcome to the-internet' },
+    abTestingLinkText: 'A/B Testing'
+} as const;
 
 test.describe('The Internet Heroku App', () => {
+
     test.beforeEach('Navigate to Landing Page', async ({ page }) => {
-        await page.goto(locators.url)
-    })
+        await page.goto(locators.url);
+    });
 
     test('Check landing page has loaded', async ({ page }) => {
-        const headerText = await page.locator(locators.landingPageHeader)
-        expect(headerText).toContainText(/Welcome to the-internet/i, { timeout: 10000 })
-
-    })
+        const heading = page.getByRole('heading', { name: locators.headingRole.name });
+        await expect(heading).toHaveText(/Welcome to the-internet/i, { timeout: 10000 });
+    });
 
     test('A/B Testing Section', async ({ page }) => {
-        await page.locator(locators.abTestingSection).click()
+        await page.getByRole('link', { name: locators.abTestingLinkText }).click();
         await expect(page).toHaveURL(/.*abtest/);
-    })
-})
+    });
+
+});
